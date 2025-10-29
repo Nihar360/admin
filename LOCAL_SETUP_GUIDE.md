@@ -21,9 +21,10 @@ Before you begin, make sure you have the following installed:
 4. **MySQL** (v8.0 or higher)
    - Check: `mysql --version`
    - Make sure MySQL is running on port 3306
-   - Database name: `ecommerce_db`
-   - Username: `root`
-   - Password: `nihar@360`
+   - You will need:
+     - Database name: `ecommerce_db` (will be created automatically)
+     - MySQL username (typically `root`)
+     - MySQL password (you'll configure this in Step 2)
 
 ## 🚀 Quick Start
 
@@ -36,13 +37,25 @@ npm install
 
 ### Step 2: Configure Backend Database Connection
 
-The backend is already configured to connect to your MySQL database with the credentials:
-- Host: `localhost:3306`
-- Database: `ecommerce_db`
-- Username: `root`
-- Password: `nihar@360`
+**IMPORTANT - Security First!**
 
-If you need to change these, edit `backend/run.sh` (Mac/Linux) or `backend/run.bat` (Windows).
+Create a `.env` file in the `backend` directory with your database credentials:
+
+```bash
+cd backend
+cp .env.example .env
+```
+
+Edit `backend/.env` and add your MySQL password:
+```
+DB_PASSWORD=your_mysql_password
+```
+
+Replace `your_mysql_password` with your actual MySQL root password.
+
+**Note**: The `.env` file is git-ignored for security. Never commit passwords to the repository!
+
+For detailed credential setup instructions, see `backend/SETUP_CREDENTIALS.md`
 
 ### Step 3: Start the Backend
 
@@ -230,8 +243,10 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/ecommerce_db
     username: root
-    password: your_password
+    password: ${DB_PASSWORD}  # Loaded from environment variable
 ```
+
+**Note**: Do not edit application.yml directly. Set DB_PASSWORD in backend/.env file instead.
 
 ### Frontend Configuration (`.env.local`)
 ```

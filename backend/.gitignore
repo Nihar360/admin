@@ -41,3 +41,8 @@ mvnw.cmd
 application-local.yml
 application-dev.yml
 application-prod.yml
+
+### Environment Variables (Security) ###
+.env
+.env.local
+.env.*.local
