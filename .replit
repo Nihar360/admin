@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "web"]
+modules = ["nodejs-20", "java-graalvm22.3", "web"]
 [agent]
 expertMode = true
 
@@ -40,6 +40,10 @@ externalPort = 3000
 [[ports]]
 localPort = 36529
 externalPort = 3001
+
+[[ports]]
+localPort = 39929
+externalPort = 3002
 
 [deployment]
 deploymentTarget = "autoscale"
