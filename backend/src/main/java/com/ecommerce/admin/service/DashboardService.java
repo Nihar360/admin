@@ -66,21 +66,34 @@ public class DashboardService {
     
     public List<SalesDataPoint> getSalesData(int days) {
         List<SalesDataPoint> salesData = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
         
-        // This is a simplified version - you can enhance with actual daily aggregation
-        LocalDateTime startDate = LocalDateTime.now().minusDays(days);
-        BigDecimal totalRevenue = orderRepository.getTotalRevenueSince(startDate);
-        Long totalOrders = orderRepository.countOrdersSince(startDate);
-        
-        if (totalRevenue == null) totalRevenue = BigDecimal.ZERO;
-        if (totalOrders == null) totalOrders = 0L;
-        
-        // For now, return a single data point
-        salesData.add(new SalesDataPoint(
-                LocalDateTime.now().toLocalDate().toString(),
-                totalRevenue,
-                totalOrders
-        ));
+        // Generate daily data points for the time series chart
+        for (int i = days - 1; i >= 0; i--) {
+            LocalDateTime dayStart = now.minusDays(i).withHour(0).withMinute(0).withSecond(0);
+            LocalDateTime dayEnd = dayStart.plusDays(1).minusSeconds(1);
+            
+            BigDecimal dayRevenue = orderRepository.getTotalRevenueSince(dayStart);
+            Long dayOrders = orderRepository.countOrdersSince(dayStart);
+            
+            // Subtract previous day's totals to get only this day's data
+            if (i < days - 1) {
+                LocalDateTime prevDayStart = now.minusDays(i + 1).withHour(0).withMinute(0).withSecond(0);
+                BigDecimal prevRevenue = orderRepository.getTotalRevenueSince(prevDayStart);
+                Long prevOrders = orderRepository.countOrdersSince(prevDayStart);
+                
+                dayRevenue = (dayRevenue != null ? dayRevenue : BigDecimal.ZERO)
+                        .subtract(prevRevenue != null ? prevRevenue : BigDecimal.ZERO);
+                dayOrders = (dayOrders != null ? dayOrders : 0L) 
+                        - (prevOrders != null ? prevOrders : 0L);
+            }
+            
+            salesData.add(new SalesDataPoint(
+                    dayStart.toLocalDate().toString(),
+                    dayRevenue != null ? dayRevenue : BigDecimal.ZERO,
+                    dayOrders != null ? dayOrders : 0L
+            ));
+        }
         
         return salesData;
     }
