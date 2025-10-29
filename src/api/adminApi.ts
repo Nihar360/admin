@@ -1,5 +1,7 @@
-// Mock API functions for admin operations
-// In production, replace these with actual API calls
+// API functions for admin operations
+// These will connect to your Spring Boot backend with MySQL database
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 
 export interface Order {
   id: string;
@@ -83,115 +85,32 @@ export interface SalesData {
   orders: number;
 }
 
-// Mock data
-const mockOrders: Order[] = Array.from({ length: 50 }, (_, i) => ({
-  id: `order-${i + 1}`,
-  orderNumber: `ORD-${String(i + 1).padStart(5, '0')}`,
-  customer: {
-    name: `Customer ${i + 1}`,
-    email: `customer${i + 1}@example.com`,
-    phone: `+1234567${String(i).padStart(4, '0')}`,
-  },
-  items: [
-    {
-      id: `item-${i + 1}`,
-      name: `Product ${i + 1}`,
-      quantity: Math.floor(Math.random() * 3) + 1,
-      price: Math.floor(Math.random() * 100) + 20,
-      image: '',
+// Helper function for API calls
+async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
     },
-  ],
-  total: Math.floor(Math.random() * 500) + 50,
-  status: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'][
-    Math.floor(Math.random() * 5)
-  ] as Order['status'],
-  paymentStatus: ['pending', 'paid', 'refunded'][Math.floor(Math.random() * 3)] as Order['paymentStatus'],
-  shippingAddress: {
-    street: `${i + 1} Main Street`,
-    city: 'New York',
-    state: 'NY',
-    zipCode: '10001',
-    country: 'USA',
-  },
-  createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-  updatedAt: new Date().toISOString(),
-}));
+  });
 
-const mockProducts: Product[] = Array.from({ length: 30 }, (_, i) => ({
-  id: `product-${i + 1}`,
-  name: `Product ${i + 1}`,
-  description: `This is a detailed description for Product ${i + 1}`,
-  price: Math.floor(Math.random() * 200) + 20,
-  category: ['Electronics', 'Clothing', 'Home & Garden', 'Sports', 'Books'][
-    Math.floor(Math.random() * 5)
-  ],
-  stock: Math.floor(Math.random() * 100),
-  sku: `SKU-${String(i + 1).padStart(5, '0')}`,
-  images: [],
-  isActive: Math.random() > 0.2,
-  createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
-}));
+  if (!response.ok) {
+    throw new Error(`API Error: ${response.statusText}`);
+  }
 
-const mockCoupons: Coupon[] = [
-  {
-    id: '1',
-    code: 'SUMMER25',
-    type: 'percentage',
-    value: 25,
-    minPurchase: 50,
-    maxDiscount: 100,
-    usageLimit: 1000,
-    usageCount: 234,
-    expiresAt: '2025-08-31T23:59:59Z',
-    isActive: true,
-  },
-  {
-    id: '2',
-    code: 'FLAT50',
-    type: 'fixed',
-    value: 50,
-    minPurchase: 200,
-    usageLimit: 500,
-    usageCount: 89,
-    expiresAt: '2025-12-31T23:59:59Z',
-    isActive: true,
-  },
-];
-
-const mockUsers: User[] = Array.from({ length: 25 }, (_, i) => ({
-  id: `user-${i + 1}`,
-  name: `Customer ${i + 1}`,
-  email: `customer${i + 1}@example.com`,
-  phone: `+1234567${String(i).padStart(4, '0')}`,
-  totalOrders: Math.floor(Math.random() * 20) + 1,
-  totalSpent: Math.floor(Math.random() * 5000) + 100,
-  joinedAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
-  status: Math.random() > 0.1 ? 'active' : 'blocked',
-}));
+  return response.json();
+}
 
 // API functions
 export const adminApi = {
   // Dashboard
   getDashboardStats: async (): Promise<DashboardStats> => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return {
-      totalRevenue: 125340,
-      totalOrders: 1234,
-      totalCustomers: 567,
-      averageOrderValue: 101.57,
-      revenueChange: 12.5,
-      ordersChange: 8.3,
-      customersChange: 15.2,
-    };
+    return apiCall<DashboardStats>('/admin/dashboard/stats');
   },
 
   getSalesData: async (days: number = 30): Promise<SalesData[]> => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return Array.from({ length: days }, (_, i) => ({
-      date: new Date(Date.now() - (days - i - 1) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      revenue: Math.floor(Math.random() * 5000) + 1000,
-      orders: Math.floor(Math.random() * 50) + 10,
-    }));
+    return apiCall<SalesData[]>(`/admin/dashboard/sales?days=${days}`);
   },
 
   // Orders
@@ -201,38 +120,24 @@ export const adminApi = {
     page?: number;
     limit?: number;
   }): Promise<{ orders: Order[]; total: number }> => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    let filtered = [...mockOrders];
-
-    if (filters?.status && filters.status !== 'all') {
-      filtered = filtered.filter((order) => order.status === filters.status);
-    }
-
-    if (filters?.search) {
-      const search = filters.search.toLowerCase();
-      filtered = filtered.filter(
-        (order) =>
-          order.orderNumber.toLowerCase().includes(search) ||
-          order.customer.name.toLowerCase().includes(search) ||
-          order.customer.email.toLowerCase().includes(search)
-      );
-    }
-
-    return { orders: filtered, total: filtered.length };
+    const params = new URLSearchParams();
+    if (filters?.status && filters.status !== 'all') params.append('status', filters.status);
+    if (filters?.search) params.append('search', filters.search);
+    if (filters?.page) params.append('page', filters.page.toString());
+    if (filters?.limit) params.append('limit', filters.limit.toString());
+    
+    return apiCall<{ orders: Order[]; total: number }>(`/admin/orders?${params}`);
   },
 
   getOrder: async (id: string): Promise<Order | null> => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return mockOrders.find((order) => order.id === id) || null;
+    return apiCall<Order>(`/admin/orders/${id}`);
   },
 
   updateOrderStatus: async (id: string, status: Order['status']): Promise<Order> => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const order = mockOrders.find((o) => o.id === id);
-    if (!order) throw new Error('Order not found');
-    order.status = status;
-    order.updatedAt = new Date().toISOString();
-    return order;
+    return apiCall<Order>(`/admin/orders/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
   },
 
   // Products
@@ -241,116 +146,73 @@ export const adminApi = {
     search?: string;
     inStock?: boolean;
   }): Promise<Product[]> => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    let filtered = [...mockProducts];
-
-    if (filters?.category && filters.category !== 'all') {
-      filtered = filtered.filter((product) => product.category === filters.category);
-    }
-
-    if (filters?.search) {
-      const search = filters.search.toLowerCase();
-      filtered = filtered.filter(
-        (product) =>
-          product.name.toLowerCase().includes(search) ||
-          product.sku.toLowerCase().includes(search)
-      );
-    }
-
-    if (filters?.inStock) {
-      filtered = filtered.filter((product) => product.stock > 0);
-    }
-
-    return filtered;
+    const params = new URLSearchParams();
+    if (filters?.category && filters.category !== 'all') params.append('category', filters.category);
+    if (filters?.search) params.append('search', filters.search);
+    if (filters?.inStock !== undefined) params.append('inStock', filters.inStock.toString());
+    
+    return apiCall<Product[]>(`/admin/products?${params}`);
   },
 
   getProduct: async (id: string): Promise<Product | null> => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return mockProducts.find((product) => product.id === id) || null;
+    return apiCall<Product>(`/admin/products/${id}`);
   },
 
   createProduct: async (data: Omit<Product, 'id' | 'createdAt'>): Promise<Product> => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const newProduct: Product = {
-      ...data,
-      id: `product-${mockProducts.length + 1}`,
-      createdAt: new Date().toISOString(),
-    };
-    mockProducts.push(newProduct);
-    return newProduct;
+    return apiCall<Product>('/admin/products', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   },
 
   updateProduct: async (id: string, data: Partial<Product>): Promise<Product> => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const product = mockProducts.find((p) => p.id === id);
-    if (!product) throw new Error('Product not found');
-    Object.assign(product, data);
-    return product;
+    return apiCall<Product>(`/admin/products/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
   },
 
   deleteProduct: async (id: string): Promise<void> => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const index = mockProducts.findIndex((p) => p.id === id);
-    if (index > -1) {
-      mockProducts.splice(index, 1);
-    }
+    return apiCall<void>(`/admin/products/${id}`, {
+      method: 'DELETE',
+    });
   },
 
   // Coupons
   getCoupons: async (): Promise<Coupon[]> => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return mockCoupons;
+    return apiCall<Coupon[]>('/admin/coupons');
   },
 
   createCoupon: async (data: Omit<Coupon, 'id' | 'usageCount'>): Promise<Coupon> => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const newCoupon: Coupon = {
-      ...data,
-      id: `coupon-${mockCoupons.length + 1}`,
-      usageCount: 0,
-    };
-    mockCoupons.push(newCoupon);
-    return newCoupon;
+    return apiCall<Coupon>('/admin/coupons', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   },
 
   updateCoupon: async (id: string, data: Partial<Coupon>): Promise<Coupon> => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const coupon = mockCoupons.find((c) => c.id === id);
-    if (!coupon) throw new Error('Coupon not found');
-    Object.assign(coupon, data);
-    return coupon;
+    return apiCall<Coupon>(`/admin/coupons/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
   },
 
   deleteCoupon: async (id: string): Promise<void> => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const index = mockCoupons.findIndex((c) => c.id === id);
-    if (index > -1) {
-      mockCoupons.splice(index, 1);
-    }
+    return apiCall<void>(`/admin/coupons/${id}`, {
+      method: 'DELETE',
+    });
   },
 
   // Users
   getUsers: async (filters?: { search?: string; status?: string }): Promise<User[]> => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    let filtered = [...mockUsers];
-
-    if (filters?.search) {
-      const search = filters.search.toLowerCase();
-      filtered = filtered.filter(
-        (user) =>
-          user.name.toLowerCase().includes(search) || user.email.toLowerCase().includes(search)
-      );
-    }
-
-    if (filters?.status && filters.status !== 'all') {
-      filtered = filtered.filter((user) => user.status === filters.status);
-    }
-
-    return filtered;
+    const params = new URLSearchParams();
+    if (filters?.search) params.append('search', filters.search);
+    if (filters?.status && filters.status !== 'all') params.append('status', filters.status);
+    
+    return apiCall<User[]>(`/admin/users?${params}`);
   },
 
   getUser: async (id: string): Promise<User | null> => {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return mockUsers.find((user) => user.id === id) || null;
+    return apiCall<User>(`/admin/users/${id}`);
   },
 };

@@ -1,8 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AdminAuthProvider } from './contexts/AdminAuthContext';
-import { AdminAuthGuard } from './components/admin/layout/AdminAuthGuard';
-import { AdminLogin } from './pages/AdminLogin';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { NotificationsPage } from './pages/NotificationsPage';
 import { OrderList } from './pages/OrderList';
@@ -21,111 +19,23 @@ export default function App() {
     <BrowserRouter>
       <AdminAuthProvider>
         <Routes>
-          <Route path="/" element={<Navigate to="/admin/login" replace />} />
-          <Route path="/preview_page.html" element={<Navigate to="/admin/login" replace />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="/preview_page.html" element={<Navigate to="/admin/dashboard" replace />} />
           
-          <Route
-            path="/admin/dashboard"
-            element={
-              <AdminAuthGuard>
-                <AdminDashboard />
-              </AdminAuthGuard>
-            }
-          />
-
-          <Route
-            path="/admin/notifications"
-            element={
-              <AdminAuthGuard>
-                <NotificationsPage />
-              </AdminAuthGuard>
-            }
-          />
-          
-          <Route
-            path="/admin/orders"
-            element={
-              <AdminAuthGuard>
-                <OrderList />
-              </AdminAuthGuard>
-            }
-          />
-          
-          <Route
-            path="/admin/orders/:id"
-            element={
-              <AdminAuthGuard>
-                <OrderDetails />
-              </AdminAuthGuard>
-            }
-          />
-          
-          <Route
-            path="/admin/products"
-            element={
-              <AdminAuthGuard>
-                <ProductList />
-              </AdminAuthGuard>
-            }
-          />
-          
-          <Route
-            path="/admin/products/:id/edit"
-            element={
-              <AdminAuthGuard>
-                <ProductForm />
-              </AdminAuthGuard>
-            }
-          />
-          
-          <Route
-            path="/admin/coupons"
-            element={
-              <AdminAuthGuard>
-                <CouponList />
-              </AdminAuthGuard>
-            }
-          />
-          
-          <Route
-            path="/admin/users"
-            element={
-              <AdminAuthGuard>
-                <UserList />
-              </AdminAuthGuard>
-            }
-          />
-          
-          <Route
-            path="/admin/inventory"
-            element={
-              <AdminAuthGuard>
-                <InventoryManagement />
-              </AdminAuthGuard>
-            }
-          />
-          
-          <Route
-            path="/admin/settings"
-            element={
-              <AdminAuthGuard>
-                <SettingsPage />
-              </AdminAuthGuard>
-            }
-          />
-          
-          <Route
-            path="/admin/reports"
-            element={
-              <AdminAuthGuard>
-                <ReportsPage />
-              </AdminAuthGuard>
-            }
-          />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/notifications" element={<NotificationsPage />} />
+          <Route path="/admin/orders" element={<OrderList />} />
+          <Route path="/admin/orders/:id" element={<OrderDetails />} />
+          <Route path="/admin/products" element={<ProductList />} />
+          <Route path="/admin/products/:id/edit" element={<ProductForm />} />
+          <Route path="/admin/coupons" element={<CouponList />} />
+          <Route path="/admin/users" element={<UserList />} />
+          <Route path="/admin/inventory" element={<InventoryManagement />} />
+          <Route path="/admin/settings" element={<SettingsPage />} />
+          <Route path="/admin/reports" element={<ReportsPage />} />
 
           {/* Catch-all route for unmatched paths */}
-          <Route path="*" element={<Navigate to="/admin/login" replace />} />
+          <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
         </Routes>
         <Toaster />
       </AdminAuthProvider>

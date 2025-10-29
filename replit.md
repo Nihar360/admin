@@ -67,7 +67,9 @@ The application includes demo credentials visible on the login page:
 - Email: admin@example.com
 - Password: admin123
 
-## Recent Changes (October 27, 2025)
+## Recent Changes (October 29, 2025)
+
+### Initial Setup (October 27, 2025)
 - Imported from GitHub
 - Configured for Replit environment
 - Set up TypeScript configuration
@@ -76,7 +78,65 @@ The application includes demo credentials visible on the login page:
 - Added .gitignore
 - Set up deployment configuration
 
+### Database Integration Update (October 29, 2025)
+- ✅ **Removed all demo/mock data** - No more hardcoded placeholder data
+- ✅ **API integration ready** - All endpoints now connect to Spring Boot backend
+- ✅ **Admin login removed** - Authentication bypassed (to be re-added later)
+- ✅ **MySQL backend ready** - Configured for local Spring Boot + MySQL setup
+- ✅ **Environment configuration** - Added .env.example for API URL configuration
+
+## Backend Integration
+
+### API Configuration
+The frontend is configured to connect to a Spring Boot backend with MySQL database. 
+
+**To set up:**
+1. Create a `.env` file in the project root:
+   ```
+   VITE_API_BASE_URL=http://localhost:8080/api
+   ```
+2. Start your Spring Boot backend on port 8080
+3. Ensure CORS is enabled in the backend for the frontend URL
+
+### Required Backend Endpoints
+All API endpoints are documented in `README_SETUP.md`. The backend should implement:
+- Dashboard stats and analytics
+- Order management (CRUD operations)
+- Product management (CRUD operations)
+- Coupon management (CRUD operations)
+- User management (view operations)
+
+### Database Schema
+The MySQL database schema is provided in `attached_assets/database_schema_*.csv` with tables for:
+- Users, Orders, Products, Categories
+- Coupons, Notifications, Admin Activity Logs
+- Order Refunds, Order Status History
+- And more...
+
+## Current Status
+
+### Authentication
+- **Status**: Bypassed/Disabled
+- **Access**: All pages are publicly accessible
+- **Login Page**: Removed (to be re-added after backend is ready)
+- **Future**: Will implement JWT authentication with Spring Boot backend
+
+### Data Source
+- **Current**: All API calls configured but will fail without backend
+- **Expected**: Spring Boot REST API on `http://localhost:8080/api`
+- **Database**: MySQL with schema as provided in documentation
+
 ## Notes
-- The app uses mock/local data (no backend API currently connected)
-- All dependencies are installed and configured
+- ✅ No demo/mock data - all removed
+- ✅ Ready for Spring Boot + MySQL backend integration
+- ✅ Environment variables configured via .env file
+- ⚠️ Backend must be running for the dashboard to work
+- ⚠️ CORS must be configured in Spring Boot backend
 - Development server automatically restarts on file changes
+
+## Next Steps
+1. Implement Spring Boot backend (see `SPRING_BOOT_BACKEND_COMPLETE_PLAN` document)
+2. Set up MySQL database with provided schema
+3. Configure `.env` file with correct API URL
+4. Test all dashboard features with live data
+5. Re-implement authentication once backend is ready

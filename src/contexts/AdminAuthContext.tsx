@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 interface Admin {
   id: string;
@@ -18,37 +18,23 @@ interface AdminAuthContextType {
 const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined);
 
 export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [admin, setAdmin] = useState<Admin | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // Authentication bypassed - always authenticated for now
+  const [admin] = useState<Admin>({
+    id: '1',
+    email: 'admin@example.com',
+    name: 'Admin User',
+    role: 'super_admin',
+  });
+  const [isLoading] = useState(false);
 
-  useEffect(() => {
-    // Check for stored admin session
-    const storedAdmin = localStorage.getItem('admin');
-    if (storedAdmin) {
-      setAdmin(JSON.parse(storedAdmin));
-    }
-    setIsLoading(false);
-  }, []);
-
-  const login = async (email: string, password: string) => {
-    // Mock login - in production, this would call an API
-    if (email === 'admin@example.com' && password === 'admin123') {
-      const adminData: Admin = {
-        id: '1',
-        email: 'admin@example.com',
-        name: 'Admin User',
-        role: 'super_admin',
-      };
-      setAdmin(adminData);
-      localStorage.setItem('admin', JSON.stringify(adminData));
-    } else {
-      throw new Error('Invalid credentials');
-    }
+  const login = async (_email: string, _password: string) => {
+    // Login bypassed - will be implemented with backend
+    return Promise.resolve();
   };
 
   const logout = () => {
-    setAdmin(null);
-    localStorage.removeItem('admin');
+    // Logout functionality disabled for now
+    console.log('Logout functionality will be implemented with backend');
   };
 
   return (
@@ -58,7 +44,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         isLoading,
         login,
         logout,
-        isAuthenticated: !!admin,
+        isAuthenticated: true, // Always authenticated for now
       }}
     >
       {children}
