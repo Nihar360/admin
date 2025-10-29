@@ -85,6 +85,13 @@ export interface SalesData {
   orders: number;
 }
 
+// API Response wrapper from Spring Boot backend
+interface ApiResponse<T> {
+  success: boolean;
+  message: string | null;
+  data: T;
+}
+
 // Helper function for API calls
 async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -99,7 +106,13 @@ async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
     throw new Error(`API Error: ${response.statusText}`);
   }
 
-  return response.json();
+  const result: ApiResponse<T> = await response.json();
+  
+  if (!result.success) {
+    throw new Error(result.message || 'API request failed');
+  }
+
+  return result.data;
 }
 
 // API functions
