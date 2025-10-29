@@ -7,18 +7,25 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
 dist
 dist-ssr
 build
 *.local
 
-# Environment variables
+# Environment variables (keep .env.local excluded for security)
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Backend build files
+backend/target/
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
 
 # Editor directories and files
 .vscode/*
@@ -30,3 +37,13 @@ build
 *.njsproj
 *.sln
 *.sw?
+
+# System files
+.local/
+.cache/
+.replit
+replit.nix
+
+# Test coverage
+coverage/
+*.coverage

@@ -228,4 +228,44 @@ export const adminApi = {
   getUser: async (id: string): Promise<User | null> => {
     return apiCall<User>(`/admin/users/${id}`);
   },
+
+  // Notifications
+  getNotifications: async (): Promise<any[]> => {
+    try {
+      return await apiCall<any[]>('/admin/notifications');
+    } catch (error) {
+      console.error('Failed to load notifications:', error);
+      return [];
+    }
+  },
+
+  getUnreadNotifications: async (): Promise<any[]> => {
+    try {
+      return await apiCall<any[]>('/admin/notifications/unread');
+    } catch (error) {
+      console.error('Failed to load unread notifications:', error);
+      return [];
+    }
+  },
+
+  getNotificationCount: async (): Promise<number> => {
+    try {
+      return await apiCall<number>('/admin/notifications/count');
+    } catch (error) {
+      console.error('Failed to load notification count:', error);
+      return 0;
+    }
+  },
+
+  markNotificationAsRead: async (id: string): Promise<void> => {
+    return apiCall<void>(`/admin/notifications/${id}/read`, {
+      method: 'PATCH',
+    });
+  },
+
+  markAllNotificationsAsRead: async (): Promise<void> => {
+    return apiCall<void>('/admin/notifications/mark-all-read', {
+      method: 'PATCH',
+    });
+  },
 };
