@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 export const API_ENDPOINTS = {
   dashboard: {
@@ -16,6 +16,11 @@ export const API_ENDPOINTS = {
     create: `${API_BASE_URL}/admin/products`,
     update: (id: number) => `${API_BASE_URL}/admin/products/${id}`,
     delete: (id: number) => `${API_BASE_URL}/admin/products/${id}`,
+    adjustStock: (id: number) => `${API_BASE_URL}/admin/products/${id}/stock`,
+  },
+  categories: {
+    list: `${API_BASE_URL}/admin/categories`,
+    detail: (id: number) => `${API_BASE_URL}/admin/categories/${id}`,
   },
   coupons: {
     list: `${API_BASE_URL}/admin/coupons`,
@@ -30,7 +35,10 @@ export const API_ENDPOINTS = {
   },
   notifications: {
     list: `${API_BASE_URL}/admin/notifications`,
+    unread: `${API_BASE_URL}/admin/notifications/unread`,
+    count: `${API_BASE_URL}/admin/notifications/count`,
     markAsRead: (id: number) => `${API_BASE_URL}/admin/notifications/${id}/read`,
+    markAllAsRead: `${API_BASE_URL}/admin/notifications/mark-all-read`,
   },
 };
 

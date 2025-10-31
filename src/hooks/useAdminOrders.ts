@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react';
-import { adminApi, Order } from '../api/adminApi';
+import { adminApi } from '../api/adminApi';
+
+type Order = {
+  id: string;
+  status: string;
+  [key: string]: any;
+};
 
 export const useAdminOrders = (filters?: {
   status?: string;

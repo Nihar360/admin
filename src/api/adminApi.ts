@@ -1,99 +1,80 @@
-// API functions for admin operations
-// These will connect to your Spring Boot backend with MySQL database
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
-
-export interface Order {
-  id: string;
-  orderNumber: string;
-  customer: {
-    name: string;
-    email: string;
-    phone: string;
-  };
-  items: Array<{
-    id: string;
-    name: string;
-    quantity: number;
-    price: number;
-    image: string;
-  }>;
-  total: number;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  paymentStatus: 'pending' | 'paid' | 'refunded';
-  shippingAddress: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
+// Types
+export interface Product {
+  id: number;
+  name: string;
+  sku: string;
+  description: string;
+  price: number;
+  discountPrice?: number;
+  categoryId: number;
+  categoryName: string;
+  stockQuantity: number;
+  inStock: boolean;
+  thumbnail?: string;
+  isActive: boolean;
+  metaDescription?: string;
+  metaKeywords?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface Product {
-  id: string;
+export interface Category {
+  id: number;
+  name: string;
+  description?: string;
+  image?: string;
+  itemCount?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProductCreateRequest {
   name: string;
   description: string;
   price: number;
-  category: string;
-  stock: number;
-  sku: string;
-  images: string[];
-  isActive: boolean;
-  createdAt: string;
+  discountPrice?: number;
+  categoryId: number;
+  stockQuantity: number;
+  sku?: string;
+  thumbnail?: string;
+  isActive?: boolean;
+  metaDescription?: string;
+  metaKeywords?: string;
 }
 
-export interface Coupon {
-  id: string;
-  code: string;
-  type: 'percentage' | 'fixed';
-  value: number;
-  minPurchase: number;
-  maxDiscount?: number;
-  usageLimit: number;
-  usageCount: number;
-  expiresAt: string;
-  isActive: boolean;
+export interface ProductUpdateRequest {
+  name?: string;
+  description?: string;
+  price?: number;
+  discountPrice?: number;
+  categoryId?: number;
+  stockQuantity?: number;
+  thumbnail?: string;
+  isActive?: boolean;
+  metaDescription?: string;
+  metaKeywords?: string;
 }
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  totalOrders: number;
-  totalSpent: number;
-  joinedAt: string;
-  status: 'active' | 'blocked';
+export interface PageResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+  first: boolean;
+  last: boolean;
 }
 
-export interface DashboardStats {
-  totalRevenue: number;
-  totalOrders: number;
-  totalCustomers: number;
-  averageOrderValue: number;
-  revenueChange: number;
-  ordersChange: number;
-  customersChange: number;
-}
-
-export interface SalesData {
-  date: string;
-  revenue: number;
-  orders: number;
-}
-
-// API Response wrapper from Spring Boot backend
-interface ApiResponse<T> {
+export interface ApiResponse<T> {
   success: boolean;
-  message: string | null;
+  message: string;
   data: T;
 }
 
-// Helper function for API calls
-async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
+// API Helper
+async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers: {
@@ -107,164 +88,155 @@ async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
   }
 
   const result: ApiResponse<T> = await response.json();
-  
-  if (!result.success) {
-    throw new Error(result.message || 'API request failed');
-  }
-
   return result.data;
 }
 
-// API functions
+// Product API
 export const adminApi = {
-  // Dashboard
-  getDashboardStats: async (): Promise<DashboardStats> => {
-    return apiCall<DashboardStats>('/admin/dashboard/stats');
+  // Products
+  async getProducts(filters?: {
+    categoryId?: number;
+    search?: string;
+    inStock?: boolean;
+    page?: number;
+    size?: number;
+  }): Promise<PageResponse<Product>> {
+    const params = new URLSearchParams();
+    if (filters?.categoryId) params.append('categoryId', filters.categoryId.toString());
+    if (filters?.search) params.append('search', filters.search);
+    if (filters?.inStock !== undefined) params.append('inStock', filters.inStock.toString());
+    params.append('page', (filters?.page ?? 0).toString());
+    params.append('size', (filters?.size ?? 10).toString());
+
+    return fetchApi<PageResponse<Product>>(`/admin/products?${params.toString()}`);
   },
 
-  getSalesData: async (days: number = 30): Promise<SalesData[]> => {
-    return apiCall<SalesData[]>(`/admin/dashboard/sales?days=${days}`);
+  async getProduct(id: string | number): Promise<Product> {
+    return fetchApi<Product>(`/admin/products/${id}`);
+  },
+
+  async createProduct(data: ProductCreateRequest): Promise<Product> {
+    return fetchApi<Product>('/admin/products', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async updateProduct(id: string | number, data: ProductUpdateRequest): Promise<Product> {
+    return fetchApi<Product>(`/admin/products/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteProduct(id: string | number): Promise<void> {
+    return fetchApi<void>(`/admin/products/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  async adjustStock(id: string | number, type: 'add' | 'remove', quantity: number): Promise<Product> {
+    return fetchApi<Product>(`/admin/products/${id}/stock`, {
+      method: 'PUT',
+      body: JSON.stringify({ type, quantity }),
+    });
+  },
+
+  // Categories
+  async getCategories(): Promise<Category[]> {
+    return fetchApi<Category[]>('/admin/categories');
+  },
+
+  async getCategory(id: string | number): Promise<Category> {
+    return fetchApi<Category>(`/admin/categories/${id}`);
+  },
+
+  // Dashboard
+  async getDashboardStats(): Promise<any> {
+    return fetchApi('/admin/dashboard/stats');
+  },
+
+  async getSalesData(days: number = 30): Promise<any> {
+    return fetchApi(`/admin/dashboard/sales?days=${days}`);
   },
 
   // Orders
-  getOrders: async (filters?: {
-    status?: string;
-    search?: string;
-    page?: number;
-    limit?: number;
-  }): Promise<{ orders: Order[]; total: number }> => {
+  async getOrders(filters?: { status?: string; search?: string; page?: number; limit?: number }): Promise<any> {
     const params = new URLSearchParams();
-    if (filters?.status && filters.status !== 'all') params.append('status', filters.status);
+    if (filters?.status) params.append('status', filters.status);
     if (filters?.search) params.append('search', filters.search);
-    if (filters?.page) params.append('page', filters.page.toString());
+    if (filters?.page !== undefined) params.append('page', filters.page.toString());
     if (filters?.limit) params.append('limit', filters.limit.toString());
-    
-    return apiCall<{ orders: Order[]; total: number }>(`/admin/orders?${params}`);
+
+    return fetchApi(`/admin/orders?${params.toString()}`);
   },
 
-  getOrder: async (id: string): Promise<Order | null> => {
-    return apiCall<Order>(`/admin/orders/${id}`);
+  async getOrder(id: string | number): Promise<any> {
+    return fetchApi(`/admin/orders/${id}`);
   },
 
-  updateOrderStatus: async (id: string, status: Order['status']): Promise<Order> => {
-    return apiCall<Order>(`/admin/orders/${id}/status`, {
+  async updateOrderStatus(id: string | number, status: string): Promise<any> {
+    return fetchApi(`/admin/orders/${id}/status`, {
       method: 'PATCH',
       body: JSON.stringify({ status }),
     });
   },
 
-  // Products
-  getProducts: async (filters?: {
-    category?: string;
-    search?: string;
-    inStock?: boolean;
-  }): Promise<Product[]> => {
+  // Users
+  async getUsers(filters?: { search?: string; status?: string }): Promise<any> {
     const params = new URLSearchParams();
-    if (filters?.category && filters.category !== 'all') params.append('category', filters.category);
     if (filters?.search) params.append('search', filters.search);
-    if (filters?.inStock !== undefined) params.append('inStock', filters.inStock.toString());
-    
-    return apiCall<Product[]>(`/admin/products?${params}`);
+    if (filters?.status) params.append('status', filters.status);
+
+    return fetchApi(`/admin/users?${params.toString()}`);
   },
 
-  getProduct: async (id: string): Promise<Product | null> => {
-    return apiCall<Product>(`/admin/products/${id}`);
-  },
-
-  createProduct: async (data: Omit<Product, 'id' | 'createdAt'>): Promise<Product> => {
-    return apiCall<Product>('/admin/products', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  },
-
-  updateProduct: async (id: string, data: Partial<Product>): Promise<Product> => {
-    return apiCall<Product>(`/admin/products/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  },
-
-  deleteProduct: async (id: string): Promise<void> => {
-    return apiCall<void>(`/admin/products/${id}`, {
-      method: 'DELETE',
-    });
+  async getUser(id: string | number): Promise<any> {
+    return fetchApi(`/admin/users/${id}`);
   },
 
   // Coupons
-  getCoupons: async (): Promise<Coupon[]> => {
-    return apiCall<Coupon[]>('/admin/coupons');
+  async getCoupons(): Promise<any> {
+    return fetchApi('/admin/coupons');
   },
 
-  createCoupon: async (data: Omit<Coupon, 'id' | 'usageCount'>): Promise<Coupon> => {
-    return apiCall<Coupon>('/admin/coupons', {
+  async getCoupon(id: string | number): Promise<any> {
+    return fetchApi(`/admin/coupons/${id}`);
+  },
+
+  async createCoupon(data: any): Promise<any> {
+    return fetchApi('/admin/coupons', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
 
-  updateCoupon: async (id: string, data: Partial<Coupon>): Promise<Coupon> => {
-    return apiCall<Coupon>(`/admin/coupons/${id}`, {
+  async updateCoupon(id: string | number, data: any): Promise<any> {
+    return fetchApi(`/admin/coupons/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   },
 
-  deleteCoupon: async (id: string): Promise<void> => {
-    return apiCall<void>(`/admin/coupons/${id}`, {
+  async deleteCoupon(id: string | number): Promise<void> {
+    return fetchApi(`/admin/coupons/${id}`, {
       method: 'DELETE',
     });
   },
 
-  // Users
-  getUsers: async (filters?: { search?: string; status?: string }): Promise<User[]> => {
-    const params = new URLSearchParams();
-    if (filters?.search) params.append('search', filters.search);
-    if (filters?.status && filters.status !== 'all') params.append('status', filters.status);
-    
-    return apiCall<User[]>(`/admin/users?${params}`);
-  },
-
-  getUser: async (id: string): Promise<User | null> => {
-    return apiCall<User>(`/admin/users/${id}`);
-  },
-
   // Notifications
-  getNotifications: async (): Promise<any[]> => {
-    try {
-      return await apiCall<any[]>('/admin/notifications');
-    } catch (error) {
-      console.error('Failed to loaRetryABContinuetypescriptd notifications:', error);
-      return [];
-    }
+  async getNotifications(): Promise<any> {
+    return fetchApi('/admin/notifications');
   },
 
-  getUnreadNotifications: async (): Promise<any[]> => {
-    try {
-      return await apiCall<any[]>('/admin/notifications/unread');
-    } catch (error) {
-      console.error('Failed to load unread notifications:', error);
-      return [];
-    }
-  },
-
-  getNotificationCount: async (): Promise<number> => {
-    try {
-      return await apiCall<number>('/admin/notifications/count');
-    } catch (error) {
-      console.error('Failed to load notification count:', error);
-      return 0;
-    }
-  },
-
-  markNotificationAsRead: async (id: string): Promise<void> => {
-    return apiCall<void>(`/admin/notifications/${id}/read`, {
+  async markNotificationAsRead(id: string | number): Promise<any> {
+    return fetchApi(`/admin/notifications/${id}/read`, {
       method: 'PATCH',
     });
   },
 
-  markAllNotificationsAsRead: async (): Promise<void> => {
-    return apiCall<void>('/admin/notifications/mark-all-read', {
+  async markAllNotificationsAsRead(): Promise<any> {
+    return fetchApi('/admin/notifications/mark-all-read', {
       method: 'PATCH',
     });
   },

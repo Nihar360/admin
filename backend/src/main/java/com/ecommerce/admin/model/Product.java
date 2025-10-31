@@ -3,6 +3,7 @@ package com.ecommerce.admin.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -18,6 +19,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Product {
     
     @Id
@@ -39,18 +41,17 @@ public class Product {
     @Column(name = "discount_price", precision = 10, scale = 2)
     private BigDecimal discountPrice;
     
-    private String category;
-    
-    @Column(name = "category_id")
-    private Long categoryId;
-    
-    @Column(name = "category_name")
-    private String categoryName;
+    // Use @ManyToOne relationship instead of separate fields
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    @JsonIgnore
+    private Category category;
     
     @Column(name = "image_url")
     private String imageUrl;
     
     @Column(nullable = false)
+    @Builder.Default
     private String image = "";
     
     private String thumbnail;
@@ -59,16 +60,20 @@ public class Product {
     private Integer stockQuantity;
     
     @Column(name = "stock_count", nullable = false)
+    @Builder.Default
     private Integer stockCount = 0;
     
     @Column(name = "in_stock", nullable = false)
+    @Builder.Default
     private Boolean inStock = true;
     
     @Column(unique = true)
     private String sku;
     
+    @Builder.Default
     private Double rating = 0.0;
     
+    @Builder.Default
     private Integer reviews = 0;
     
     private String badge;
@@ -80,18 +85,22 @@ public class Product {
     private String metaKeywords;
     
     @Column(name = "is_active")
+    @Builder.Default
     private Boolean isActive = true;
     
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonIgnore  // Ignore during direct JSON serialization
+    @JsonIgnore
+    @Builder.Default
     private List<ProductImage> images = new ArrayList<>();
     
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
+    @Builder.Default
     private List<ProductFeature> features = new ArrayList<>();
     
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
+    @Builder.Default
     private List<ProductSize> sizes = new ArrayList<>();
     
     @CreationTimestamp
@@ -101,4 +110,9 @@ public class Product {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    
+    // Helper method to ensure backward compatibility
+    public Boolean getInStock() {
+        return this.inStock;
+    }
 }
