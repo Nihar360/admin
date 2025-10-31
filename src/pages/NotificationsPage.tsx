@@ -7,7 +7,7 @@ import { Button } from '../components/ui/button';
 import { adminApi, Order } from '../api/adminApi';
 import { ShoppingCart, Eye, CheckCircle2 } from 'lucide-react';
 import { Separator } from '../components/ui/separator';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface Notification {
   id: string;

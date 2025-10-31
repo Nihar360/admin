@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -20,32 +21,36 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @Column(nullable = false)
+    private String title;
+    
+    @Column(columnDefinition = "TEXT")
+    private String message;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private NotificationType type;
     
-    @Column(nullable = false)
-    private String title;
-    
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String message;
-    
-    @Column(name = "reference_id")
-    private Long referenceId;
+    @Column(name = "is_read", nullable = false)
+    private Boolean isRead = false;
     
     @Column(name = "reference_type")
-    private String referenceType;
+    private String referenceType;  // e.g., "ORDER", "PRODUCT", "USER"
     
-    @Column(name = "is_read")
-    private Boolean isRead = false;
+    @Column(name = "reference_id")
+    private Long referenceId;  // ID of the related entity
     
     @Column(name = "read_at")
     private LocalDateTime readAt;
     
+    @Column(name = "user_id")
+    private Long userId;  // Admin user who should see this notification
+    
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+    
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }

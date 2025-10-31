@@ -7,7 +7,7 @@ import { Label } from '../components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Switch } from '../components/ui/switch';
 import { Separator } from '../components/ui/separator';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { useAdminAuth } from '../contexts/AdminAuthContext';
 
 export const SettingsPage: React.FC = () => {

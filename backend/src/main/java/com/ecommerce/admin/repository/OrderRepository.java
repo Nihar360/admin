@@ -19,6 +19,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByStatus(OrderStatus status);
     Page<Order> findByStatus(OrderStatus status, Pageable pageable);
     
+    
     @Query("SELECT o FROM Order o WHERE o.orderNumber LIKE %:search% OR o.user.fullName LIKE %:search%")
     Page<Order> searchOrders(@Param("search") String search, Pageable pageable);
     

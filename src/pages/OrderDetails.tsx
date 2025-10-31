@@ -10,7 +10,7 @@ import { adminApi, Order } from '../api/adminApi';
 import { ArrowLeft, Truck, Ban, RotateCcw } from 'lucide-react';
 import { Badge } from '../components/ui/badge';
 import { Separator } from '../components/ui/separator';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 export const OrderDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();

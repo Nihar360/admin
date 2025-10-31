@@ -48,7 +48,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
             ) : (
               <Select
                 value={values[filter.name] || ''}
-                onValueChange={(value) => onChange(filter.name, value)}
+                onValueChange={(value: string) => onChange(filter.name, value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={filter.placeholder} />

@@ -234,7 +234,7 @@ export const adminApi = {
     try {
       return await apiCall<any[]>('/admin/notifications');
     } catch (error) {
-      console.error('Failed to load notifications:', error);
+      console.error('Failed to loaRetryABContinuetypescriptd notifications:', error);
       return [];
     }
   },

@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -18,19 +17,28 @@ public class ProductCreateRequest {
     @NotBlank(message = "Product name is required")
     private String name;
     
+    private String sku;
+    
+    @NotBlank(message = "Description is required")
     private String description;
     
     @NotNull(message = "Price is required")
     @Positive(message = "Price must be positive")
     private BigDecimal price;
     
-    @NotBlank(message = "Category is required")
-    private String category;
+    private BigDecimal discountPrice;
+    
+    @NotNull(message = "Category ID is required")
+    private Long categoryId;
     
     @NotNull(message = "Stock quantity is required")
-    private Integer stock;
+    private Integer stockQuantity;
     
-    private String sku;
-    private List<String> images;
-    private Boolean isActive;
+    private String thumbnail;
+    
+    private Boolean isActive = true;
+    
+    private String metaDescription;
+    
+    private String metaKeywords;
 }

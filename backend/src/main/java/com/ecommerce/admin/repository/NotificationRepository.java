@@ -2,16 +2,18 @@ package com.ecommerce.admin.repository;
 
 import com.ecommerce.admin.model.Notification;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    List<Notification> findByUserIdOrderByCreatedAtDesc(Long userId);
-    List<Notification> findByUserIdAndIsReadOrderByCreatedAtDesc(Long userId, Boolean isRead);
     
-    @Query("SELECT COUNT(n) FROM Notification n WHERE n.userId = :userId AND n.isRead = false")
-    Long countUnreadNotifications(Long userId);
+    List<Notification> findByIsReadFalse();
+    
+    Long countByIsReadFalse();
+    
+    List<Notification> findByUserId(Long userId);
+    
+    List<Notification> findByUserIdAndIsReadFalse(Long userId);
 }

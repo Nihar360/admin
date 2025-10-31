@@ -1,8 +1,12 @@
 package com.ecommerce.admin.model.enums;
 
 public enum NotificationType {
-    NEW_ORDER,
-    LOW_STOCK,
-    ORDER_CANCELLED,
-    REFUND_REQUEST
+    INFO,
+    SUCCESS,
+    WARNING,
+    ERROR,
+    ORDER,
+    PRODUCT,
+    USER,
+    SYSTEM
 }

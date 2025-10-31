@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from '../components/ui/dialog';
 import { AlertCircle, PackagePlus, PackageMinus } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 export const InventoryManagement: React.FC = () => {
   const { products, isLoading, updateProduct } = useAdminProducts();

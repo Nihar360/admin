@@ -16,7 +16,7 @@ import {
 } from '../components/ui/select';
 import { adminApi, Product } from '../api/adminApi';
 import { ArrowLeft } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 export const ProductForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();

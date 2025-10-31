@@ -10,7 +10,7 @@ import { Product } from '../api/adminApi';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 export const ProductList: React.FC = () => {
   const [filters, setFilters] = useState({

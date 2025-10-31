@@ -1,5 +1,6 @@
 package com.ecommerce.admin.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,13 +17,14 @@ public class ProductImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(name = "product_id", nullable = false)
-    private Long productId;
-    
     @Column(name = "image_url")
     private String imageUrl;
     
+    @Column(name = "display_order")
+    private Integer displayOrder;
+    
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", insertable = false, updatable = false)
+    @JoinColumn(name = "product_id", nullable = false)
+    @JsonIgnore  // Prevent circular reference during JSON serialization
     private Product product;
 }
